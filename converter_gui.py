@@ -7,7 +7,7 @@ from pathlib import Path
 
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import Button, Canvas, Entry, PhotoImage, Text, Tk
+from tkinter import Button, Canvas, Entry, PhotoImage, Text, Tk, Toplevel, Label
 from urllib import request
 
 import numpy as np
@@ -20,11 +20,29 @@ OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path("./assets")
 
 
+def error_window():
+    error = Toplevel(window)
+    error.title("Error!")
+    error.geometry("300x200")
+    Label(
+        error,
+        text="Invalid URL or image format! \n Please, try again!",
+        justify="center",
+    ).pack(expand=True)
+    Button(
+        error, text="OK", relief="flat", command=error.destroy, borderwidth=0, font=("Bungee", 14 * -1), bg="#A5A6F6"
+    ).pack(side="bottom", fill="x")    
+    error.focus()
+
+
 def convert():
     # getting image from internet
-    img = PIL.Image.open(urllib.request.urlopen(entry_1.get()))
-    img.save("original.png")
-    img = np.asarray(PIL.Image.open("original.png"))
+    try:
+        img = PIL.Image.open(urllib.request.urlopen(entry_1.get()))
+        img.save("original.png")
+        img = np.asarray(PIL.Image.open("original.png"))
+    except Exception:
+        error_window()
     # converting arrays
     y_arr = skimage.color.rgb2yiq(np.asarray(img))
     for rows in y_arr:
@@ -71,8 +89,9 @@ def relative_to_assets(path: str) -> Path:
 
 
 window = Tk()
-
 window.title("RGB to YIQ channels converter")
+ico = PhotoImage(file=relative_to_assets("icon.png"))
+window.iconphoto(True, ico)
 window.geometry("1440x774")
 window.configure(bg="#FFFFFF")
 
@@ -126,7 +145,7 @@ image_3 = canvas.create_image(886.0, 393.0, image=image_image_3)
 image_image_4 = PhotoImage(file=relative_to_assets("image_4.png"))
 image_4 = canvas.create_image(1218.0, 393.0, image=image_image_4)
 
-text1 = canvas.create_text(
+canvas.create_text(
     172.0,
     232.0,
     anchor="nw",
